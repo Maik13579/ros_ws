@@ -1,0 +1,59 @@
+version: '2.4'
+services:
+        rviz:
+                build:
+                        context: .
+                        dockerfile: Dockerfile
+                        target: rviz
+                runtime: nvidia
+                environment:
+                        WAIT_FOR_ROSCORE: 1
+                        ROS_IP: $ROS_IP
+                        ROS_HOSTNAME: $ROS_HOSTNAME
+                        ROS_MASTER_URI: $ROS_MASTER_URI
+                        DISPLAY: $DISPLAY
+                        QT_X11_NO_MITSHM: '1'
+                        NVIDIA_VISIBLE_DEVICES: all
+                        NVIDIA_DRIVER_CAPABILITIES: compute,video,utility,graphics
+                network_mode: host
+                privileged: true
+                stdin_open: true
+                volumes:
+                        - /tmp/.X11-unix:/tmp/.X11-unix
+                        - $HOME/.Xauthority:/root/.Xauthority
+                command: rviz
+        rqt:
+                build:
+                        context: .
+                        dockerfile: Dockerfile
+                        target: rqt
+                environment:
+                        WAIT_FOR_ROSCORE: 1
+                        ROS_IP: $ROS_IP
+                        ROS_HOSTNAME: $ROS_HOSTNAME
+                        ROS_MASTER_URI: $ROS_MASTER_URI
+                        DISPLAY: $DISPLAY
+                        QT_X11_NO_MITSHM: '1'
+                network_mode: host
+                privileged: true
+                stdin_open: true
+                volumes:
+                        - /tmp/.X11-unix:/tmp/.X11-unix
+                        - $HOME/.Xauthority:/root/.Xauthority
+                command: rqt
+        flexbe:
+                build:
+                        context: .
+                        dockerfile: flexbe/Dockerfile
+                        target: flexbe
+                environment:
+                        ROS_IP: $ROS_IP
+                        ROS_HOSTNAME: $ROS_HOSTNAME
+                        ROS_MASTER_URI: $ROS_MASTER_URI
+                        DISPLAY: $DISPLAY
+                network_mode: host
+                privileged: true
+                stdin_open: true
+                volumes:
+                        - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+                command: bash -c "source /opt/ros/$ROS_DISTRO/setup.bash && catkin_make && source /root/catkin_ws/devel/setup.bash && roslaunch flexbe_app flexbe_full.launch"
